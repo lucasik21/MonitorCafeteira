@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radar Dolce Gusto ☕</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#1c1613] text-[#f5ebe0] min-h-screen p-6 font-sans">
+
+  <div class="max-w-4xl mx-auto space-y-6">
+    <header class="bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b]">
+      <h1 class="text-2xl font-bold">☕ Radar da Dolce Gusto Genio S Plus</h1>
+      <p class="text-[#b09e93] text-sm">Histórico de preços da versão 110V na Amazon</p>
+    </header>
+
+    <section class="bg-[#271f1b] rounded-2xl border border-[#3d312b] overflow-hidden">
+      <div class="p-4 border-b border-[#3d312b]">
+        <h2 class="font-bold">Diário de Preços</h2>
+      </div>
+      <table class="w-full text-left text-sm">
+        <thead class="bg-[#1c1613]/60 text-[#b09e93] text-xs">
+          <tr>
+            <th class="p-4">Data</th>
+            <th class="p-4">Loja</th>
+            <th class="p-4">Valor</th>
+            <th class="p-4 text-right">Link</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-corpo" class="divide-y divide-[#3d312b]"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    async function carregar() {
+      const res = await fetch('./dados_precos.json');
+      const dados = await res.json();
+
+      document.getElementById('tabela-corpo').innerHTML = [...dados].reverse().map(item => `
+        <tr>
+          <td class="p-4">${item.data.split('-').reverse().join('/')}</td>
+          <td class="p-4">${item.plataforma}</td>
+          <td class="p-4 font-bold text-amber-300">R$ ${item.preco.toFixed(2).replace('.', ',')}</td>
+          <td class="p-4 text-right">
+            <a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Ver oferta ↗</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+    carregar();
+  </script>
+</body>
+</html>
