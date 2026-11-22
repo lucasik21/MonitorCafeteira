@@ -40,8 +40,8 @@ def coletar():
                     inteiro = page.locator(".a-price-whole").first
                     centavos = page.locator(".a-price-fraction").first
                     if inteiro.is_visible():
-                        v_int = inteiro.inner_text().replace(".", "").replace("\n", "")
-                        v_cent = centavos.inner_text() if centavos.is_visible() else "00"
+                        v_int = inteiro.inner_text().replace(".", "").replace(",", "").replace("\n", "").strip()
+                        v_cent = centavos.inner_text().strip() if centavos.is_visible() else "00"
                         preco = float(f"{v_int}.{v_cent}")
 
                 if preco:
