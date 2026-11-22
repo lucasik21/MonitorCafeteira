@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radar Dolce Gusto ☕</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-[#1c1613] text-[#f5ebe0] min-h-screen p-6 font-sans">
 
@@ -14,7 +15,6 @@
       <p class="text-[#b09e93] text-sm">Acompanhamento de preços na Amazon (110V)</p>
     </header>
 
-    <!-- NOVO: Cards de Resumo -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
         <span class="text-[#b09e93] text-xs">Menor valor registrado</span>
@@ -31,6 +31,14 @@
           <input type="number" id="input-meta" value="400" onchange="atualizar()" class="bg-[#1c1613] border border-[#4e3f38] rounded-lg px-2 py-1 w-24 font-bold text-amber-400">
         </div>
         <span id="status-meta" class="text-xs text-[#8c7a70] mt-1 block">--</span>
+      </div>
+    </section>
+
+    <!-- NOVO: Gráfico -->
+    <section class="bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b]">
+      <h2 class="font-bold mb-4">Evolução dos Preços</h2>
+      <div class="h-64">
+        <canvas id="grafico"></canvas>
       </div>
     </section>
 
@@ -54,7 +62,9 @@
 
   <script>
     let dados = [];
+    let chart = null;
     const moeda = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const dataBR = (d) => d.split('-').reverse().join('/');
 
     async function carregar() {
       const res = await fetch('./dados_precos.json');
@@ -71,18 +81,37 @@
 
       document.getElementById('kpi-menor').innerText = moeda(menor);
       document.getElementById('kpi-medio').innerText = moeda(media);
-
-      const status = document.getElementById('status-meta');
-      status.innerText = atual <= meta ? "🎉 Bateu sua meta!" : `Faltam ${moeda(atual - meta)} para a meta`;
+      document.getElementById('status-meta').innerText = atual <= meta ? "🎉 Bateu sua meta!" : `Faltam ${moeda(atual - meta)} para a meta`;
 
       document.getElementById('tabela-corpo').innerHTML = [...dados].reverse().map(item => `
         <tr>
-          <td class="p-4">${item.data.split('-').reverse().join('/')}</td>
+          <td class="p-4">${dataBR(item.data)}</td>
           <td class="p-4">${item.plataforma}</td>
           <td class="p-4 font-bold text-amber-300">${moeda(item.preco)}</td>
           <td class="p-4 text-right"><a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Ver oferta ↗</a></td>
         </tr>
       `).join('');
+
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById('grafico'), {
+        type: 'line',
+        data: {
+          labels: dados.map(d => dataBR(d.data)),
+          datasets: [
+            { label: 'Amazon', data: dados.map(d => d.preco), borderColor: '#f59e0b', tension: 0.3 },
+            { label: 'Meta', data: dados.map(() => meta), borderColor: '#fb7185', borderDash: [5, 5], pointRadius: 0 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#d6ccc2' } } },
+          scales: {
+            x: { ticks: { color: '#b09e93' }, grid: { color: '#3d312b' } },
+            y: { ticks: { color: '#b09e93' }, grid: { color: '#3d312b' } }
+          }
+        }
+      });
     }
     carregar();
   </script>
