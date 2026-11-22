@@ -11,8 +11,28 @@
   <div class="max-w-4xl mx-auto space-y-6">
     <header class="bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b]">
       <h1 class="text-2xl font-bold">☕ Radar da Dolce Gusto Genio S Plus</h1>
-      <p class="text-[#b09e93] text-sm">Histórico de preços da versão 110V na Amazon</p>
+      <p class="text-[#b09e93] text-sm">Acompanhamento de preços na Amazon (110V)</p>
     </header>
+
+    <!-- NOVO: Cards de Resumo -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
+        <span class="text-[#b09e93] text-xs">Menor valor registrado</span>
+        <p id="kpi-menor" class="text-2xl font-bold text-emerald-400 mt-1">R$ --</p>
+      </div>
+      <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
+        <span class="text-[#b09e93] text-xs">Média de preço</span>
+        <p id="kpi-medio" class="text-2xl font-bold text-amber-300 mt-1">R$ --</p>
+      </div>
+      <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
+        <span class="text-[#b09e93] text-xs">Meu preço ideal</span>
+        <div class="flex items-center gap-1 mt-1">
+          <span class="font-bold text-amber-400">R$</span>
+          <input type="number" id="input-meta" value="400" onchange="atualizar()" class="bg-[#1c1613] border border-[#4e3f38] rounded-lg px-2 py-1 w-24 font-bold text-amber-400">
+        </div>
+        <span id="status-meta" class="text-xs text-[#8c7a70] mt-1 block">--</span>
+      </div>
+    </section>
 
     <section class="bg-[#271f1b] rounded-2xl border border-[#3d312b] overflow-hidden">
       <div class="p-4 border-b border-[#3d312b]">
@@ -33,18 +53,34 @@
   </div>
 
   <script>
+    let dados = [];
+    const moeda = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
     async function carregar() {
       const res = await fetch('./dados_precos.json');
-      const dados = await res.json();
+      dados = await res.json();
+      atualizar();
+    }
+
+    function atualizar() {
+      if (!dados.length) return;
+      const meta = parseFloat(document.getElementById('input-meta').value) || 0;
+      const menor = Math.min(...dados.map(d => d.preco));
+      const media = dados.reduce((acc, d) => acc + d.preco, 0) / dados.length;
+      const atual = dados[dados.length - 1].preco;
+
+      document.getElementById('kpi-menor').innerText = moeda(menor);
+      document.getElementById('kpi-medio').innerText = moeda(media);
+
+      const status = document.getElementById('status-meta');
+      status.innerText = atual <= meta ? "🎉 Bateu sua meta!" : `Faltam ${moeda(atual - meta)} para a meta`;
 
       document.getElementById('tabela-corpo').innerHTML = [...dados].reverse().map(item => `
         <tr>
           <td class="p-4">${item.data.split('-').reverse().join('/')}</td>
           <td class="p-4">${item.plataforma}</td>
-          <td class="p-4 font-bold text-amber-300">R$ ${item.preco.toFixed(2).replace('.', ',')}</td>
-          <td class="p-4 text-right">
-            <a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Ver oferta ↗</a>
-          </td>
+          <td class="p-4 font-bold text-amber-300">${moeda(item.preco)}</td>
+          <td class="p-4 text-right"><a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Ver oferta ↗</a></td>
         </tr>
       `).join('');
     }
