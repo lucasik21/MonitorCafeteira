@@ -3,117 +3,324 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Radar Dolce Gusto ☕</title>
+  <title>Minha Dolce Gusto | Radar de Preços ☕</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
 </head>
-<body class="bg-[#1c1613] text-[#f5ebe0] min-h-screen p-6 font-sans">
+<body class="bg-[#1c1613] text-[#f5ebe0] min-h-screen p-4 md:p-8">
 
-  <div class="max-w-4xl mx-auto space-y-6">
-    <header class="bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b]">
-      <h1 class="text-2xl font-bold">☕ Radar da Dolce Gusto Genio S Plus</h1>
-      <p class="text-[#b09e93] text-sm">Acompanhamento de preços na Amazon (110V)</p>
+  <div class="max-w-5xl mx-auto space-y-6">
+    
+    <!-- Cabeçalho Acolhedor -->
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b] shadow-lg">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl">
+          ☕
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold text-[#f5ebe0]">Radar da Dolce Gusto Genio S Plus</h1>
+          <p class="text-[#b09e93] text-sm">De olho no menor preço da versão 110V na Amazon para você não pagar caro</p>
+        </div>
+      </div>
+      <div class="mt-4 md:mt-0">
+        <button onclick="abrirModal()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-[#1c1613] font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md cursor-pointer">
+          + Anotar um preço
+        </button>
+      </div>
     </header>
 
+    <!-- Banner de Status Amigável -->
+    <div id="banner-humor" class="bg-[#271f1b] border border-[#3d312b] rounded-2xl p-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span id="humor-icone" class="text-2xl">👀</span>
+        <div>
+          <p id="humor-titulo" class="font-semibold text-sm md:text-base text-[#f5ebe0]">Analisando os preços...</p>
+          <p id="humor-subtitulo" class="text-xs text-[#b09e93]">Carregando o histórico das suas buscas.</p>
+        </div>
+      </div>
+      <a href="https://a.co/d/08MUsjUM" target="_blank" class="shrink-0 text-xs font-semibold bg-[#3d312b] hover:bg-[#4e3f38] text-amber-300 px-3.5 py-2 rounded-xl transition">
+        Ver na Amazon ↗
+      </a>
+    </div>
+
+    <!-- Cards de Resumo -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
-        <span class="text-[#b09e93] text-xs">Menor valor registrado</span>
-        <p id="kpi-menor" class="text-2xl font-bold text-emerald-400 mt-1">R$ --</p>
+        <span class="text-[#b09e93] text-xs font-medium">Menor valor que já apareceu</span>
+        <p id="kpi-menor" class="text-2xl md:text-3xl font-bold text-emerald-400 mt-1">R$ --</p>
+        <span id="kpi-data" class="text-xs text-[#8c7a70] mt-1 block">--</span>
       </div>
+
       <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
-        <span class="text-[#b09e93] text-xs">Média de preço</span>
-        <p id="kpi-medio" class="text-2xl font-bold text-amber-300 mt-1">R$ --</p>
+        <span class="text-[#b09e93] text-xs font-medium">Média de preço</span>
+        <p id="kpi-medio" class="text-2xl md:text-3xl font-bold text-amber-300 mt-1">R$ --</p>
+        <span class="text-xs text-[#8c7a70] mt-1 block">Para você saber se uma oferta é real</span>
       </div>
+
       <div class="bg-[#271f1b] p-5 rounded-2xl border border-[#3d312b]">
-        <span class="text-[#b09e93] text-xs">Meu preço ideal</span>
-        <div class="flex items-center gap-1 mt-1">
-          <span class="font-bold text-amber-400">R$</span>
-          <input type="number" id="input-meta" value="400" onchange="atualizar()" class="bg-[#1c1613] border border-[#4e3f38] rounded-lg px-2 py-1 w-24 font-bold text-amber-400">
+        <span class="text-[#b09e93] text-xs font-medium">Meu preço ideal (Meta)</span>
+        <div class="flex items-center gap-1.5 mt-1">
+          <span class="text-lg font-bold text-amber-400">R$</span>
+          <input type="number" id="input-meta" value="400" onchange="atualizarDashboard()" 
+                 class="bg-[#1c1613] border border-[#4e3f38] focus:border-amber-400 outline-none rounded-xl px-3 py-1 w-28 text-xl font-bold text-amber-400">
         </div>
-        <span id="status-meta" class="text-xs text-[#8c7a70] mt-1 block">--</span>
+        <span class="text-xs text-[#8c7a70] mt-1 block">Altere o valor acima quando quiser</span>
       </div>
     </section>
 
-    <!-- NOVO: Gráfico -->
+    <!-- Filtro de Período -->
+    <section class="bg-[#271f1b] p-4 rounded-2xl border border-[#3d312b] flex flex-wrap gap-4 items-center justify-between">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div>
+          <label class="block text-xs text-[#b09e93] mb-1">A partir de</label>
+          <input type="date" id="filtro-inicio" onchange="atualizarDashboard()" class="bg-[#1c1613] border border-[#4e3f38] rounded-xl px-3 py-1.5 text-sm text-[#f5ebe0]">
+        </div>
+        <div>
+          <label class="block text-xs text-[#b09e93] mb-1">Até o dia</label>
+          <input type="date" id="filtro-fim" onchange="atualizarDashboard()" class="bg-[#1c1613] border border-[#4e3f38] rounded-xl px-3 py-1.5 text-sm text-[#f5ebe0]">
+        </div>
+      </div>
+      <button onclick="limparFiltros()" class="text-xs text-amber-400 hover:text-amber-300 underline cursor-pointer">
+        Mostrar todo o período
+      </button>
+    </section>
+
+    <!-- Gráfico -->
     <section class="bg-[#271f1b] p-6 rounded-2xl border border-[#3d312b]">
-      <h2 class="font-bold mb-4">Evolução dos Preços</h2>
-      <div class="h-64">
-        <canvas id="grafico"></canvas>
+      <div class="mb-4">
+        <h2 class="text-base font-bold text-[#f5ebe0]">Como o preço tem se comportado</h2>
+        <p class="text-xs text-[#b09e93]">A linha tracejada em vermelho mostra o seu preço ideal</p>
+      </div>
+      <div class="h-72">
+        <canvas id="graficoPrecos"></canvas>
       </div>
     </section>
 
+    <!-- Histórico em Lista -->
     <section class="bg-[#271f1b] rounded-2xl border border-[#3d312b] overflow-hidden">
-      <div class="p-4 border-b border-[#3d312b]">
-        <h2 class="font-bold">Diário de Preços</h2>
+      <div class="p-5 border-b border-[#3d312b] flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-[#f5ebe0]">Diário de Anotações</h2>
+          <p class="text-xs text-[#b09e93]">Todas as vezes que o robô (ou você) conferiu o valor</p>
+        </div>
+        <span id="contador-registros" class="text-xs bg-[#3d312b] text-[#f5ebe0] px-3 py-1 rounded-full">0 registros</span>
       </div>
-      <table class="w-full text-left text-sm">
-        <thead class="bg-[#1c1613]/60 text-[#b09e93] text-xs">
-          <tr>
-            <th class="p-4">Data</th>
-            <th class="p-4">Loja</th>
-            <th class="p-4">Valor</th>
-            <th class="p-4 text-right">Link</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-corpo" class="divide-y divide-[#3d312b]"></tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-[#1c1613]/60 text-[#b09e93] text-xs">
+            <tr>
+              <th class="p-4 font-medium">Quando foi visto</th>
+              <th class="p-4 font-medium">Loja</th>
+              <th class="p-4 font-medium">Valor encontrado</th>
+              <th class="p-4 font-medium text-right">Acesso</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo" class="divide-y divide-[#3d312b]"></tbody>
+        </table>
+      </div>
     </section>
+
+  </div>
+
+  <!-- Modal Amigável -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-[#271f1b] border border-[#4e3f38] rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+      <div>
+        <h3 class="text-lg font-bold text-[#f5ebe0]">Anotar um preço manualmente</h3>
+        <p class="text-xs text-[#b09e93]">Viu uma promoção relâmpago? Adicione aqui no histórico.</p>
+      </div>
+      <div>
+        <label class="block text-xs text-[#b09e93] mb-1">Data</label>
+        <input type="date" id="novo-data" class="w-full bg-[#1c1613] border border-[#4e3f38] rounded-xl p-2.5 text-sm text-[#f5ebe0]">
+      </div>
+      <div>
+        <label class="block text-xs text-[#b09e93] mb-1">Valor (R$)</label>
+        <input type="number" step="0.01" id="novo-preco" placeholder="Ex: 389.90" class="w-full bg-[#1c1613] border border-[#4e3f38] rounded-xl p-2.5 text-sm text-[#f5ebe0]">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="fecharModal()" class="px-4 py-2 text-sm text-[#b09e93] hover:text-white cursor-pointer">Agora não</button>
+        <button onclick="salvarManual()" class="bg-amber-500 hover:bg-amber-400 text-[#1c1613] font-bold px-5 py-2 rounded-xl text-sm cursor-pointer">Guardar valor</button>
+      </div>
+    </div>
   </div>
 
   <script>
     let dados = [];
-    let chart = null;
-    const moeda = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const dataBR = (d) => d.split('-').reverse().join('/');
+    let chartInstance = null;
 
-    async function carregar() {
-      const res = await fetch('./dados_precos.json');
-      dados = await res.json();
-      atualizar();
+    // Formata "2026-11-22" para "22/11/2026"
+    function formatarDataBR(dataISO) {
+      if (!dataISO || !dataISO.includes('-')) return dataISO;
+      const [ano, mes, dia] = dataISO.split('-');
+      return `${dia}/${mes}/${ano}`;
     }
 
-    function atualizar() {
-      if (!dados.length) return;
+    // Formata número para Real brasileiro (ex: 415,65)
+    function formatarMoeda(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    async function inicializar() {
+      try {
+        const resposta = await fetch('./dados_precos.json');
+        if (resposta.ok) {
+          dados = await resposta.json();
+        }
+      } catch (e) {
+        console.error("Erro ao ler o arquivo JSON:", e);
+      }
+      atualizarDashboard();
+    }
+
+    function limparFiltros() {
+      document.getElementById('filtro-inicio').value = '';
+      document.getElementById('filtro-fim').value = '';
+      atualizarDashboard();
+    }
+
+    function atualizarDashboard() {
+      const dataInicio = document.getElementById('filtro-inicio').value;
+      const dataFim = document.getElementById('filtro-fim').value;
       const meta = parseFloat(document.getElementById('input-meta').value) || 0;
-      const menor = Math.min(...dados.map(d => d.preco));
-      const media = dados.reduce((acc, d) => acc + d.preco, 0) / dados.length;
-      const atual = dados[dados.length - 1].preco;
 
-      document.getElementById('kpi-menor').innerText = moeda(menor);
-      document.getElementById('kpi-medio').innerText = moeda(media);
-      document.getElementById('status-meta').innerText = atual <= meta ? "🎉 Bateu sua meta!" : `Faltam ${moeda(atual - meta)} para a meta`;
+      const filtrados = dados
+        .filter(item => !dataInicio || item.data >= dataInicio)
+        .filter(item => !dataFim || item.data <= dataFim)
+        .sort((a, b) => a.data.localeCompare(b.data));
 
-      document.getElementById('tabela-corpo').innerHTML = [...dados].reverse().map(item => `
-        <tr>
-          <td class="p-4">${dataBR(item.data)}</td>
-          <td class="p-4">${item.plataforma}</td>
-          <td class="p-4 font-bold text-amber-300">${moeda(item.preco)}</td>
-          <td class="p-4 text-right"><a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Ver oferta ↗</a></td>
-        </tr>
-      `).join('');
+      document.getElementById('contador-registros').innerText = 
+        `${filtrados.length} ${filtrados.length === 1 ? 'anotação' : 'anotações'}`;
 
-      if (chart) chart.destroy();
-      chart = new Chart(document.getElementById('grafico'), {
+      if (filtrados.length > 0) {
+        const menorItem = filtrados.reduce((min, atual) => atual.preco < min.preco ? atual : min, filtrados[0]);
+        const ultimoItem = filtrados[filtrados.length - 1];
+        const soma = filtrados.reduce((acc, item) => acc + item.preco, 0);
+        const media = soma / filtrados.length;
+
+        document.getElementById('kpi-menor').innerText = formatarMoeda(menorItem.preco);
+        document.getElementById('kpi-data').innerText = `Registrado em ${formatarDataBR(menorItem.data)}`;
+        document.getElementById('kpi-medio').innerText = formatarMoeda(media);
+
+        // Atualiza o banner de humor com base no preço mais recente
+        const banner = document.getElementById('banner-humor');
+        const icone = document.getElementById('humor-icone');
+        const titulo = document.getElementById('humor-titulo');
+        const subtitulo = document.getElementById('humor-subtitulo');
+
+        if (ultimoItem.preco <= meta) {
+          banner.className = "bg-emerald-950/60 border border-emerald-500/40 rounded-2xl p-4 flex items-center justify-between gap-4";
+          icone.innerText = "🎉";
+          titulo.innerText = `Oba! O preço atual (${formatarMoeda(ultimoItem.preco)}) bateu a sua meta!`;
+          subtitulo.innerText = "Esse é um ótimo momento para garantir a sua cafeteira.";
+        } else {
+          const diferenca = ultimoItem.preco - meta;
+          banner.className = "bg-[#271f1b] border border-[#3d312b] rounded-2xl p-4 flex items-center justify-between gap-4";
+          icone.innerText = "⏳";
+          titulo.innerText = `Ainda está ${formatarMoeda(diferenca)} acima do seu preço ideal`;
+          subtitulo.innerText = `O último valor registrado foi ${formatarMoeda(ultimoItem.preco)} em ${formatarDataBR(ultimoItem.data)}. Vale a pena aguardar!`;
+        }
+      }
+
+      renderizarGrafico(filtrados, meta);
+      renderizarTabela(filtrados);
+    }
+
+    function renderizarGrafico(lista, meta) {
+      const ctx = document.getElementById('graficoPrecos').getContext('2d');
+      const datas = lista.map(d => formatarDataBR(d.data));
+      const precos = lista.map(d => d.preco);
+
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: dados.map(d => dataBR(d.data)),
+          labels: datas,
           datasets: [
-            { label: 'Amazon', data: dados.map(d => d.preco), borderColor: '#f59e0b', tension: 0.3 },
-            { label: 'Meta', data: dados.map(() => meta), borderColor: '#fb7185', borderDash: [5, 5], pointRadius: 0 }
+            {
+              label: 'Preço na Amazon',
+              data: precos,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.15)',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: '#fbbf24',
+              tension: 0.35,
+              fill: true
+            },
+            {
+              label: 'Seu preço ideal',
+              data: datas.map(() => meta),
+              borderColor: '#fb7185',
+              borderDash: [6, 6],
+              pointRadius: 0,
+              fill: false
+            }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#d6ccc2' } } },
+          plugins: {
+            legend: { labels: { color: '#d6ccc2' } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: ${formatarMoeda(ctx.parsed.y)}`
+              }
+            }
+          },
           scales: {
             x: { ticks: { color: '#b09e93' }, grid: { color: '#3d312b' } },
-            y: { ticks: { color: '#b09e93' }, grid: { color: '#3d312b' } }
+            y: {
+              ticks: {
+                color: '#b09e93',
+                callback: (val) => 'R$ ' + val
+              },
+              grid: { color: '#3d312b' }
+            }
           }
         }
       });
     }
-    carregar();
+
+    function renderizarTabela(lista) {
+      const tbody = document.getElementById('tabela-corpo');
+      const menorPreco = lista.length ? Math.min(...lista.map(i => i.preco)) : 0;
+
+      tbody.innerHTML = [...lista].reverse().map(item => {
+        const ehOMenor = item.preco === menorPreco && lista.length > 1;
+        return `
+          <tr class="hover:bg-[#322823] transition">
+            <td class="p-4 text-[#d6ccc2]">${formatarDataBR(item.data)}</td>
+            <td class="p-4 font-medium">${item.plataforma}</td>
+            <td class="p-4">
+              <span class="font-bold text-amber-300">${formatarMoeda(item.preco)}</span>
+              ${ehOMenor ? '<span class="ml-2 text-[11px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">Menor valor</span>' : ''}
+            </td>
+            <td class="p-4 text-right">
+              <a href="${item.url}" target="_blank" class="text-xs text-amber-400 hover:underline">Abrir oferta ↗</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function abrirModal() { document.getElementById('modal').classList.remove('hidden'); }
+    function fecharModal() { document.getElementById('modal').classList.add('hidden'); }
+    function salvarManual() {
+      const data = document.getElementById('novo-data').value;
+      const preco = parseFloat(document.getElementById('novo-preco').value);
+      if (data && preco) {
+        dados.push({ data, plataforma: "Amazon", preco, url: "https://a.co/d/08MUsjUM" });
+        fecharModal();
+        atualizarDashboard();
+      }
+    }
+
+    inicializar();
   </script>
 </body>
 </html>
