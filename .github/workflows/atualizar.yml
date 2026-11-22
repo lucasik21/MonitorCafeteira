@@ -1,0 +1,37 @@
+name: Atualizar Preços Diariamente
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # Roda todo dia às 09h (horário de Brasília)
+  workflow_dispatch:     # Permite rodar manualmente com 1 clique no GitHub
+
+permissions:
+  contents: write
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Playwright
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Rodar Scraper
+        run: python scraper.py
+
+      - name: Salvar novo JSON
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add dados_precos.json
+          git commit -m "chore: atualiza historico de precos" || exit 0
+          git push
